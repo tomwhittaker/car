@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cars</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <div id="t"></div>
+    <div id="p"></div>
+    <div id="X"></div>
+    <div id="Y"></div>
+    <div id="Z"></div>
+    <div id="x"></div>
+    <div id="z"></div>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script src="./lib/cuon-matrix.js"></script>
+    <script src="./car.js"></script>
+    <script>
+      var tid = setInterval(load, 2);
+      function load(){
+        document.getElementById("t").innerHTML = theta;
+        document.getElementById("p").innerHTML = phi;
+        document.getElementById("X").innerHTML = eyeX;
+        document.getElementById("Y").innerHTML = eyeY;
+        document.getElementById("Z").innerHTML = eyeZ;
+        document.getElementById("x").innerHTML = x;
+        document.getElementById("z").innerHTML = z;
+      }
+    </script>
+
+  </body>
+</html>

@@ -23,6 +23,7 @@ var setView=false;
 var colours =[];
 var map={};
 var size=200;
+var directional = false;
 var colors = new Float32Array([    // Colors
   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v1-v2-v3 front
   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v3-v4-v5 right
@@ -137,9 +138,18 @@ var FSHADER_SOURCE =
   '#ifdef GL_ES\n' +
   'precision mediump float;\n' +
   '#endif\n' +
+  'uniform vec3 u_AmbientLight;\n' +
   'varying vec4 v_Color;\n' +
+  'uniform bool u_isLighting;\n' +
   'void main() {\n' +
+  '  if(u_isLighting)\n' +
+  '  {\n' +
   '  gl_FragColor = v_Color;\n' +
+  '  }else\n' +
+  '  {\n' +
+  '     vec3 ambient = u_AmbientLight * v_Color.rgb;\n' +
+  '  gl_FragColor = vec4(ambient, v_Color.a);\n' +
+  '  }\n' +
   '}\n';
 
 var modelMatrix = new Matrix4(); // The model matrix
@@ -178,7 +188,7 @@ function main() {
   var u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
   var u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
   var u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
-
+  var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
   // Trigger using lighting or not
   var u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
@@ -191,6 +201,7 @@ function main() {
 
   // Set the light color (white)
   gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+  gl.uniform3f(u_AmbientLight, 0.7, 0.7, 1);
   // Set the light direction (in the world coordinate)
   var lightDirection = new Vector3([0.5, 3.0, 4.0]);
   lightDirection.normalize();     // Normalize
@@ -274,7 +285,7 @@ function main() {
     if (map.w){
       x=x+4*Math.cos(-carRot * (Math.PI / 180));
       z=z+4*Math.sin(-carRot * (Math.PI / 180));
-      wheelrot=wheelrot-10;
+      wheelrot=wheelrot-20;
     }
     if (map.a){
       carRot=carRot+10;
@@ -282,6 +293,7 @@ function main() {
     if (map.s){
       x=x-4*Math.cos(-carRot * (Math.PI / 180));
       z=z-4*Math.sin(-carRot * (Math.PI / 180));
+      wheelrot=wheelrot+20;
     }
     if (map.d){
       carRot=carRot-10;
@@ -394,6 +406,14 @@ function key(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatrix) {
         break;
     case 13: //enter
         map.enter= (ev.type == 'keydown');
+        break;
+    case 16: //left shift
+        if (directional){
+          directional=false;
+        }
+        else {
+          directional=true;
+        }
         break;
     default: return; // Skip drawing at no effective action
   }
@@ -572,7 +592,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   // Draw x and y axes
   gl.drawArrays(gl.LINES, 0, n);
 
-  gl.uniform1i(u_isLighting, true); // Will apply lighting
+  gl.uniform1i(u_isLighting, directional); // Will apply lighting
 
   // Set the vertex coordinates and color (for the cube)
   n = initVertexBuffers(gl);

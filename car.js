@@ -2,11 +2,14 @@
 // Vertex shader program
 var theta=0;
 var phi=0;
-var r=30;
+var r=25;
 var step=0.174533;
 var eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
 var eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
 var eyeZ=(r)*(Math.cos(theta));
+var setX=0;
+var setY=300;
+var setZ=300;
 var x=0;
 var z=0;
 var wheelrot=0;
@@ -14,7 +17,9 @@ var pointX=0;
 var pointY=0;
 var pointZ=0;
 var carRot=0;
-
+var leftDoor=false;
+var rightDoor=false;
+var setView=false;
 var colours =[];
 var colors = new Float32Array([    // Colors
   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v1-v2-v3 front
@@ -191,7 +196,7 @@ function main() {
 
   // Calculate the view matrix and the projection matrix
   viewMatrix.setLookAt(eyeX, eyeY, eyeZ, pointX, pointY, pointZ, 0, 1, 0);
-  projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
+  projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 1200);
   // Pass the model, view, and projection matrix to the uniform variable respectively
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
   gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
@@ -209,27 +214,44 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatri
       // g_xAngle = (g_xAngle + ANGLE_STEP) % 360;
       // pointY=pointY+5;
       // eyeY=eyeY-1;
-      theta=theta+step;
-      eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
-      eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
-      eyeZ=(r)*(Math.cos(theta));
-      viewMatrix.setLookAt(x+eyeX, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
-      // Pass the model, view, and projection matrix to the uniform variable respectively
-      gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-      draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      if (!setView){
+        theta=theta+step;
+        eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
+        eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
+        eyeZ=(r)*(Math.cos(theta));
+        viewMatrix.setLookAt(x+eyeX, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+        // Pass the model, view, and projection matrix to the uniform variable respectively
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
+      else{
+        setZ=setZ+3;
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
       break;
+
     case 40: // Down arrow key -> the negative rotation of arm1 around the y-axis
       // g_xAngle = (g_xAngle - ANGLE_STEP) % 360;
       // angleY=angleY-step;
       // eyeY=15*Math.sin(angleY);
-      theta=theta-step;
-      eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
-      eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
-      eyeZ=(r)*(Math.cos(theta));
-      viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
-      // Pass the model, view, and projection matrix to the uniform variable respectively
-      gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-      draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      if (!setView){
+        theta=theta-step;
+        eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
+        eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
+        eyeZ=(r)*(Math.cos(theta));
+        viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+        // Pass the model, view, and projection matrix to the uniform variable respectively
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
+      else{
+        setZ=setZ-3;
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
       break;
     case 39: // Right arrow key -> the positive rotation of arm1 around the y-axis
       // g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
@@ -238,14 +260,22 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatri
       // angleX=angleX+step;
       // eyeX=15*Math.sin(angleX);
       // eyeZ=15*Math.cos(angleX);
-      phi=phi+step;
-      eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
-      eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
-      eyeZ=(r)*(Math.cos(theta));
-      viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
-      // Pass the model, view, and projection matrix to the uniform variable respectively
-      gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-      draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      if (!setView){
+        phi=phi+step;
+        eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
+        eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
+        eyeZ=(r)*(Math.cos(theta));
+        viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+        // Pass the model, view, and projection matrix to the uniform variable respectively
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
+      else{
+        setX=setX+3;
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
       break;
     case 37: // Left arrow key -> the negative rotation of arm1 around the y-axis
       // g_yAngle = (g_yAngle - ANGLE_STEP) % 360;
@@ -254,49 +284,109 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatri
       // angleX=angleX-step;
       // eyeX=15*Math.sin(angleX);
       // eyeZ=15*Math.cos(ang§leX);
-      phi=phi-step;
-      eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
-      eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
-      eyeZ=(r)*(Math.cos(theta));
-      viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
-      // Pass the model, view, and projection matrix to the uniform variable respectively
-      gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-      draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      if (!setView){
+        phi=phi-step;
+        eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
+        eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
+        eyeZ=(r)*(Math.cos(theta));
+        viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+        // Pass the model, view, and projection matrix to the uniform variable respectively
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
+      else{
+        setX=setX-3;
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+        gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+        draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      }
       break;
     case 87: //w
-      x=x+1;
+      x=x+2*Math.cos(-carRot * (Math.PI / 180));
+      z=z+2*Math.sin(-carRot * (Math.PI / 180));
       wheelrot=wheelrot-10;
-      viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+      if (setView){
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+      }
+      else{
+        viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+      }
+
       // Pass the model, view, and projection matrix to the uniform variable respectively
       gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
       draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
       break;
     case 65: //a
       // z=z-1;
-      carRot=carRot+3;
-      viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
-      // Pass the model, view, and projection matrix to the uniform variable respectively
+      carRot=carRot+10;
+      if (setView){
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+      }
+      else{
+        viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+      }
+           // Pass the model, view, and projection matrix to the uniform variable respectively
       gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
       draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
       break;
     case 83: //s
-      x=x-1;
-      viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
-      // Pass the model, view, and projection matrix to the uniform variable respectively
+      x=x-2*Math.cos(-carRot * (Math.PI / 180));
+      z=z-2*Math.sin(-carRot * (Math.PI / 180));
+      if (setView){
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+      }
+      else{
+        viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+      }      // Pass the model, view, and projection matrix to the uniform variable respectively
       gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
       wheelrot=wheelrot+10;
       draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
       break;
     case 68: //d
       // z=z+1;
-      carRot=carRot-3;
-      viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
-      // Pass the model, view, and projection matrix to the uniform variable respectively
+      carRot=carRot-10;
+      if (setView){
+        viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+      }
+      else{
+        viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+      }      // Pass the model, view, and projection matrix to the uniform variable respectively
       gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
       draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
       break;
+    case 71: //g
+        if (leftDoor){
+          leftDoor=false;
+        }
+        else {
+          leftDoor=true;
+        }
+        break;
+    case 72: //h
+        if (rightDoor){
+          rightDoor=false;
+        }
+        else {
+          rightDoor=true;
+        }
+        break;
+    case 13: //enter
+        if (setView){
+          setView=false;
+          viewMatrix.setLookAt(eyeX+x, eyeY, eyeZ+z, x, pointY, z, 0, 1, 0);
+          gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+          draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+        }
+        else{
+          setView=true;
+          viewMatrix.setLookAt(setX, setY, setZ, pointX, pointY, pointZ, 0, 1, 0);
+          gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+          draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+        }
+        break;
     default: return; // Skip drawing at no effective action
   }
+
 
   // Draw the scene
   draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
@@ -481,15 +571,15 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   }
   //model floor
   pushMatrix(modelMatrix);
-  modelMatrix.translate(0, -1, 0);
-    modelMatrix.scale(600, 0.001, 600); // Scale
+  modelMatrix.translate(0, -1.5, 0);
+    modelMatrix.scale(200, 1, 200); // Scale
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   var colors = colours[1];
   if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
   // Rotate, and then translate
-  modelMatrix.setTranslate(x, 0, z);  // Translation (No translation is supported here)
+  modelMatrix.translate(x, 0, z);  // Translation (No translation is supported here)
   modelMatrix.rotate(carRot, 0, 1, 0); // Rotate along y axis
   // modelMatrix.rotate(g_xAngle, 0, 1, 0); // Rotate along x axis
 
@@ -544,19 +634,27 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
     modelMatrix.scale(1, 1, 0.2); // Scale
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
-  //model car door right
+  // model car door right
   colors = colours[7];
   if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
   pushMatrix(modelMatrix);
     modelMatrix.translate(0, 0, 2);
+    if (rightDoor){
+      modelMatrix.translate(0, 0, 0.4);
+      modelMatrix.rotate(70,0,1,0);
+    }
     modelMatrix.scale(1, 1, 0.2); // Scale
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
-  //model car door right
+  //model car door left
   colors = colours[8];
   if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
   pushMatrix(modelMatrix);
     modelMatrix.translate(0, 0, -2);
+    if (leftDoor){
+      modelMatrix.translate(0, 0, -0.4);
+      modelMatrix.rotate(-70,0,1,0);
+    }
     modelMatrix.scale(1, 1, 0.2); // Scale
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();

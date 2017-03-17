@@ -12,6 +12,9 @@ var setY=300;
 var setZ=300;
 var x=0;
 var z=0;
+var speed=0;
+var maxSpeed=5;
+var acceleration=0.5;
 var wheelrot=0;
 var pointX=0;
 var pointY=0;
@@ -240,6 +243,11 @@ function main() {
     key(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatrix);
   };
   setInterval(function(){
+
+    speed=speed/1.1;
+    wheelrot=wheelrot-5*speed;
+    x=x+speed*Math.cos(-carRot * (Math.PI / 180));
+    z=z+speed*Math.sin(-carRot * (Math.PI / 180));
     if (map.up){
       if (!setView){
         theta=theta+step;
@@ -300,20 +308,25 @@ function main() {
       }
     }
     if (map.w){
-      x=x+3*Math.cos(-carRot * (Math.PI / 180));
-      z=z+3*Math.sin(-carRot * (Math.PI / 180));
-      wheelrot=wheelrot-20;
+      if (speed<maxSpeed){
+        speed=speed+acceleration;
+      }
+
     }
     if (map.a){
-      carRot=carRot+10;
+      if (Math.abs(speed) !== 0){
+        carRot=carRot+10;
+      }
     }
     if (map.s){
-      x=x-3*Math.cos(-carRot * (Math.PI / 180));
-      z=z-3*Math.sin(-carRot * (Math.PI / 180));
-      wheelrot=wheelrot+20;
+      if (speed>-maxSpeed){
+        speed=speed-acceleration;
+      }
     }
     if (map.d){
-      carRot=carRot-10;
+      if (Math.abs(speed) !== 0){
+        carRot=carRot-10;
+      }
     }
     if (x<-size/2){
       x=-size/2;

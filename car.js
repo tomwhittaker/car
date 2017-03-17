@@ -3,7 +3,7 @@
 var theta=0;
 var phi=0;
 var r=50;
-var step=0.174533;
+var step=0.174533/3;
 var eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
 var eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
 var eyeZ=(r)*(Math.cos(theta));
@@ -300,16 +300,16 @@ function main() {
       }
     }
     if (map.w){
-      x=x+4*Math.cos(-carRot * (Math.PI / 180));
-      z=z+4*Math.sin(-carRot * (Math.PI / 180));
+      x=x+3*Math.cos(-carRot * (Math.PI / 180));
+      z=z+3*Math.sin(-carRot * (Math.PI / 180));
       wheelrot=wheelrot-20;
     }
     if (map.a){
       carRot=carRot+10;
     }
     if (map.s){
-      x=x-4*Math.cos(-carRot * (Math.PI / 180));
-      z=z-4*Math.sin(-carRot * (Math.PI / 180));
+      x=x-3*Math.cos(-carRot * (Math.PI / 180));
+      z=z-3*Math.sin(-carRot * (Math.PI / 180));
       wheelrot=wheelrot+20;
     }
     if (map.d){
@@ -329,14 +329,6 @@ function main() {
       }
       else {
         rightDoor=true;
-      }
-    }
-    if (map.enter){
-      if (setView){
-        setView=false;
-      }
-      else{
-        setView=true;
       }
     }
     if (x<-size/2){
@@ -363,56 +355,37 @@ function main() {
       draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
     }
     draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,canvas,u_ViewMatrix,u_ProjMatrix);
-  }, 100);
+}, 30);
 }
 function key(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatrix) {
   switch (ev.keyCode) {
     case 38: // Up arrow key -> the positive rotation of arm1 around the y-axis
-      // g_xAngle = (g_xAngle + ANGLE_STEP) % 360;
-      // pointY=pointY+5;
-      // eyeY=eyeY-1;
       map.up= (ev.type == 'keydown');
-
-
       break;
 
     case 40: // Down arrow key -> the negative rotation of arm1 around the y-axis
-      // g_xAngle = (g_xAngle - ANGLE_STEP) % 360;
-      // angleY=angleY-step;
-      // eyeY=15*Math.sin(angleY);
+
       map.down= (ev.type == 'keydown');
 
       break;
     case 39: // Right arrow key -> the positive rotation of arm1 around the y-axis
-      // g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
-      // eyeZ=eyeZ-1;
-      // eyeX=Math.sqrt(Math.pow(15,2)-Math.pow(eyeZ,2));
-      // angleX=angleX+step;
-      // eyeX=15*Math.sin(angleX);
-      // eyeZ=15*Math.cos(angleX);
+
       map.right= (ev.type == 'keydown');
       break;
     case 37: // Left arrow key -> the negative rotation of arm1 around the y-axis
-      // g_yAngle = (g_yAngle - ANGLE_STEP) % 360;
-      // eyeZ=eyeZ-1;
-      // eyeX=-Math.sqrt(Math.pow(15,2)-Math.pow(eyeZ,2));
-      // angleX=angleX-step;
-      // eyeX=15*Math.sin(angleX);
-      // eyeZ=15*Math.cos(ang§leX);
+
       map.left= (ev.type == 'keydown');
       break;
     case 87: //w
       map.w= (ev.type == 'keydown');
       break;
     case 65: //a
-      // z=z-1;
       map.a= (ev.type == 'keydown');
       break;
     case 83: //s
       map.s= (ev.type == 'keydown');
       break;
     case 68: //d
-      // z=z+1;
       map.d= (ev.type == 'keydown');
       break;
     case 71: //g
@@ -422,14 +395,23 @@ function key(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatrix) {
         map.h= (ev.type == 'keydown');
         break;
     case 13: //enter
-        map.enter= (ev.type == 'keydown');
+        if (ev.type == 'keydown'){
+          if (setView){
+            setView=false;
+          }
+          else{
+            setView=true;
+          }
+        }
         break;
     case 16: //left shift
-        if (directional){
-          directional=false;
-        }
-        else {
-          directional=true;
+        if (ev.type == 'keydown'){
+          if (directional){
+            directional=false;
+          }
+          else {
+            directional=true;
+          }
         }
         break;
     default: return; // Skip drawing at no effective action

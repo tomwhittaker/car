@@ -1,8 +1,8 @@
-// Directional lighting demo: By Frederick Li
+// Based on a Directional lighting and a Point Lighting demo: By Frederick Li
 // Vertex shader program
 var theta=0;
 var phi=0;
-var r=25;
+var r=50;
 var step=0.174533;
 var eyeX=(r)*(Math.sin(theta))*(Math.cos(phi));
 var eyeY=(r)*(Math.sin(theta))*(Math.sin(phi));
@@ -118,6 +118,8 @@ var VSHADER_SOURCE =
   'uniform vec3 u_LightDirection;\n' + // Light direction (in the world coordinate, normalized)
   'varying vec4 v_Color;\n' +
   'uniform bool u_isLighting;\n' +
+  'varying vec3 v_Normal;\n' +
+  'varying vec3 v_Position;\n' +
   'void main() {\n' +
   '  gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;\n' +
   '  if(u_isLighting)\n' +
@@ -129,6 +131,8 @@ var VSHADER_SOURCE =
   '     v_Color = vec4(diffuse, a_Color.a);\n' +  '  }\n' +
   '  else\n' +
   '  {\n' +
+  '  v_Position = vec3(u_ModelMatrix * a_Position);\n' +
+  '  v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));\n' +
   '     v_Color = a_Color;\n' +
   '  }\n' +
   '}\n';
@@ -139,16 +143,24 @@ var FSHADER_SOURCE =
   'precision mediump float;\n' +
   '#endif\n' +
   'uniform vec3 u_AmbientLight;\n' +
+  'varying vec3 v_Normal;\n' +
+  'uniform vec3 u_LightColorSpot;\n' +
   'varying vec4 v_Color;\n' +
   'uniform bool u_isLighting;\n' +
+  'varying vec3 v_Position;\n' +
+  'uniform vec3 u_LightPosition;\n' +
   'void main() {\n' +
   '  if(u_isLighting)\n' +
   '  {\n' +
   '  gl_FragColor = v_Color;\n' +
   '  }else\n' +
   '  {\n' +
+  '  vec3 normal = normalize(v_Normal);\n' +
+  '  vec3 lightDirection = normalize(u_LightPosition - v_Position);\n' +
+  '  float nDotL = max(dot(lightDirection, normal), 0.0);\n' +
+  '  vec3 diffuse = u_LightColorSpot * v_Color.rgb * nDotL;\n' +
   '     vec3 ambient = u_AmbientLight * v_Color.rgb;\n' +
-  '  gl_FragColor = vec4(ambient, v_Color.a);\n' +
+  '  gl_FragColor = vec4(ambient+diffuse, v_Color.a);\n' +
   '  }\n' +
   '}\n';
 
@@ -189,19 +201,24 @@ function main() {
   var u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
   var u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
   var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
+
+  var u_LightColorSpot = gl.getUniformLocation(gl.program, 'u_LightColorSpot');
+  var u_LightPosition = gl.getUniformLocation(gl.program, 'u_LightPosition');
   // Trigger using lighting or not
   var u_isLighting = gl.getUniformLocation(gl.program, 'u_isLighting');
 
   if (!u_ModelMatrix || !u_ViewMatrix || !u_NormalMatrix ||
       !u_ProjMatrix || !u_LightColor || !u_LightDirection ||
-      !u_isLighting ) {
+      !u_isLighting || !u_LightPosition || !u_AmbientLight|| !u_LightColorSpot) {
     console.log('Failed to Get the storage locations of u_ModelMatrix, u_ViewMatrix, and/or u_ProjMatrix');
     return;
   }
 
   // Set the light color (white)
   gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
-  gl.uniform3f(u_AmbientLight, 0.7, 0.7, 1);
+  gl.uniform3f(u_LightColorSpot, 1.0, 1.0, 1.0);
+  gl.uniform3f(u_AmbientLight, 0.3, 0.3, 0.3);
+  gl.uniform3f(u_LightPosition, 5, 20, 5);
   // Set the light direction (in the world coordinate)
   var lightDirection = new Vector3([0.5, 3.0, 4.0]);
   lightDirection.normalize();     // Normalize

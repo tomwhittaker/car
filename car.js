@@ -315,22 +315,6 @@ function main() {
     if (map.d){
       carRot=carRot-10;
     }
-    if (map.g){
-      if (leftDoor){
-        leftDoor=false;
-      }
-      else {
-        leftDoor=true;
-      }
-    }
-    if (map.h){
-      if (rightDoor){
-        rightDoor=false;
-      }
-      else {
-        rightDoor=true;
-      }
-    }
     if (x<-size/2){
       x=-size/2;
     }
@@ -389,10 +373,24 @@ function key(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting,u_ViewMatrix) {
       map.d= (ev.type == 'keydown');
       break;
     case 71: //g
-        map.g= (ev.type == 'keydown');
+        if (ev.type == 'keydown'){
+          if (leftDoor){
+            leftDoor=false;
+          }
+          else {
+            leftDoor=true;
+          }
+        }
         break;
     case 72: //h
-        map.h= (ev.type == 'keydown');
+        if (ev.type == 'keydown'){
+          if (rightDoor){
+            rightDoor=false;
+          }
+          else {
+            rightDoor=true;
+          }
+        }
         break;
     case 13: //enter
         if (ev.type == 'keydown'){
@@ -587,9 +585,6 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   modelMatrix.setTranslate(0, 0, 0);  // No Translation
   // Pass the model matrix to the uniform variable
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-
-  // Draw x and y axes
-  gl.drawArrays(gl.LINES, 0, n);
 
   gl.uniform1i(u_isLighting, directional); // Will apply lighting
 
